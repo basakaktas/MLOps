@@ -1,18 +1,23 @@
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
-import joblib
+import pickle
 
 
-ratings = pd.read_csv("ratings.csv")
-movies = pd.read_csv("movies.csv")
+movies = pd.read_csv("../data/movies.csv")
+ratings = pd.read_csv("../data/ratings.csv")
 
 
-user_movie_matrix = ratings.pivot(index='userId', columns='movieId', values='rating').fillna(0)
+user_movie_matrix = ratings.pivot_table(index='userId', columns='movieId', values='rating')
 
+user_movie_matrix.fillna(0, inplace=True)
+
+movie_matrix = user_movie_matrix.T  
 
 knn = NearestNeighbors(metric='cosine', algorithm='brute')
-knn.fit(user_movie_matrix.T)
+knn.fit(movie_matrix.values)
 
 
-joblib.dump(knn, "knn_model.pkl")
-user_movie_matrix.T.to_pickle("movie_matrix.pkl")
+movie_matrix.to_pickle("movie_matrix.pkl")
+with open("knn_model.pkl", "wb") as f:
+    pickle.dump(knn, f)
+movies.to_csv("movies.csv", index=False)
