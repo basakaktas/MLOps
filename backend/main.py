@@ -3,12 +3,12 @@ import pickle
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-movie_matrix = pd.read_pickle("../model/movie_matrix.pkl")
+movie_matrix = pd.read_pickle("movie_matrix.pkl")
 
-with open("../model/knn_model.pkl", "rb") as f:
+with open("knn_model.pkl", "rb") as f:
     knn = pickle.load(f)
 
-movies = pd.read_csv("../model/movies.csv")
+movies = pd.read_csv("movies.csv")
 
 
 app = FastAPI()
