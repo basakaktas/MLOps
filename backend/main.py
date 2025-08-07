@@ -5,17 +5,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "backend")
-
-os.makedirs(DATA_DIR, exist_ok=True)
 
 try:
-    movie_matrix = pd.read_pickle(os.path.join(DATA_DIR, "movie_matrix.pkl"))
-    with open(os.path.join(DATA_DIR, "knn_model.pkl"), "rb") as f:
+    movie_matrix = pd.read_pickle(os.path.join(BASE_DIR, "movie_matrix.pkl"))
+    with open(os.path.join(BASE_DIR, "knn_model.pkl"), "rb") as f:
         knn = pickle.load(f)
-    movies = pd.read_csv(os.path.join(DATA_DIR, "movies.csv"))
+    movies = pd.read_csv(os.path.join(BASE_DIR, "movies.csv"))
 except Exception as e:
-    raise RuntimeError(f"Failed to load model files: {str(e)}")
+    raise RuntimeError(f"Failed to load model files: {str(e)}\n"
+                     f"Current directory: {BASE_DIR}\n"
+                     f"Files expected: {os.listdir(BASE_DIR)}")
 
 app = FastAPI()
 
@@ -26,6 +25,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Movie Recommendation API",
+        "endpoints": {
+            "root": "/",
+            "predict": "/predict/?movie_title={title}",
+            "health": "/health"
+        }
+    }
 
 @app.get("/predict/")
 def recommend(movie_title: str):
@@ -45,3 +55,11 @@ def recommend(movie_title: str):
 
     except Exception as e:
         return {"error": str(e)}
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    port = int(os.environ.get("PORT", 8080))  
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
+

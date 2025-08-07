@@ -7,7 +7,10 @@ movie = st.text_input("Enter a movie you like:", "Toy Story")
 
 if st.button("Recommend"):
     with st.spinner("Finding recommendations..."):
-        response = requests.get(f"http://localhost:8000/predict/", params={"movie_title": movie})
+        response = requests.get(
+    "https://fastapi-ml-recommender-449457250227.us-central1.run.app/predict/",
+    params={"movie_title": movie}
+)
         if response.status_code == 200:
             recommendations = response.json()["recommendations"]
             st.success("Recommended Movies:")
