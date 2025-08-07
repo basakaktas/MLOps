@@ -5,7 +5,7 @@ steps:
         'run',
         'deploy',
         'fastapi-ml-recommender',
-        '--source=.',
+        '--source=backend',
         '--region=us-central1',
         '--platform=managed',
         '--allow-unauthenticated',
