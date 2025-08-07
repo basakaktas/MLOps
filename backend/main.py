@@ -1,18 +1,23 @@
+import os
 import pandas as pd
 import pickle
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-movie_matrix = pd.read_pickle("movie_matrix.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "backend")
 
-with open("knn_model.pkl", "rb") as f:
-    knn = pickle.load(f)
+os.makedirs(DATA_DIR, exist_ok=True)
 
-movies = pd.read_csv("movies.csv")
-
+try:
+    movie_matrix = pd.read_pickle(os.path.join(DATA_DIR, "movie_matrix.pkl"))
+    with open(os.path.join(DATA_DIR, "knn_model.pkl"), "rb") as f:
+        knn = pickle.load(f)
+    movies = pd.read_csv(os.path.join(DATA_DIR, "movies.csv"))
+except Exception as e:
+    raise RuntimeError(f"Failed to load model files: {str(e)}")
 
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,7 +26,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/predict/")
 def recommend(movie_title: str):

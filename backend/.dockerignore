@@ -1,6 +1,0 @@
-__pycache__
-*.pyc
-*.pkl
-.env
-.git
-venv/
