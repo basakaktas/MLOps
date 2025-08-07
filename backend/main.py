@@ -40,7 +40,16 @@ async def root():
 @app.get("/predict/")
 def recommend(movie_title: str):
     try:
-        movie_id = movies[movies['title'].str.contains(movie_title, case=False, na=False)].iloc[0]['movieId']
+        match = movies[movies['title'].str.contains(movie_title, case=False, na=False)]
+        if match.empty:
+            suggestions = movies[movies['title'].str.startswith(movie_title[:3], na=False)].head(5)['title'].tolist()
+            return {
+                "status": "error",
+                "error": "Movie not found",
+                "suggestions": suggestions
+            }
+
+        movie_id = match.iloc[0]['movieId']
         movie_idx = movie_matrix.index.get_loc(movie_id)
 
         distances, indices = knn.kneighbors([movie_matrix.iloc[movie_idx].values], n_neighbors=6)
@@ -51,10 +60,24 @@ def recommend(movie_title: str):
             title = movies[movies['movieId'] == similar_id]['title'].values[0]
             similar_movies.append(title)
 
-        return {"recommendations": similar_movies}
+        return {
+            "status": "success",
+            "match": match.iloc[0]['title'],
+            "recommendations": similar_movies
+        }
 
     except Exception as e:
-        return {"error": str(e)}
+        return {"status": "error", "error": str(e)}
+
+    
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "model_version": "1.0",
+        "loaded": all([movie_matrix is not None, knn is not None, movies is not None])
+    }
+
 
 if __name__ == "__main__":
     import uvicorn

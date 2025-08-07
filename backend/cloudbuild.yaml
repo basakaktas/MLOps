@@ -1,12 +1,13 @@
 steps:
   - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: 'bash'
+    entrypoint: bash
     args:
       - '-c'
       - |
         gcloud run deploy fastapi-ml-recommender \
           --source . \
           --region us-central1 \
-          --platform managed \
-          --allow-unauthenticated \
-          --port 8000
+          --platform=managed \
+          --allow-unauthenticated
+
+timeout: 900s
