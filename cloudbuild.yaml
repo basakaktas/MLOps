@@ -4,6 +4,7 @@ steps:
     args:
       - '-c'
       - |
+        cd backend && \
         gcloud run deploy fastapi-ml-recommender \
           --source . \
           --region us-central1 \
